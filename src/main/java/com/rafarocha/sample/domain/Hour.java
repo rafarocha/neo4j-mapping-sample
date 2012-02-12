@@ -5,10 +5,15 @@ import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.springframework.data.neo4j.annotation.GraphId;
+import org.springframework.data.neo4j.annotation.NodeEntity;
 
 import com.google.common.collect.Ranges;
 
+@NodeEntity
 public class Hour implements Comparable<Hour> {
+	
+	@GraphId public Long id;
 	
 	public static final String PATTERN = "HH:mm";
 	public String hour;   // 00-23 timezone
@@ -31,7 +36,6 @@ public class Hour implements Comparable<Hour> {
 		return Hour.create( hour );
 	}
 	
-	
 	public boolean isValid(String hour) {
 		if ( hour == null ) return false;
 		
@@ -44,10 +48,6 @@ public class Hour implements Comparable<Hour> {
 		return true;
 	}
 	
-	public static void main(String[] args) {
-		System.out.println(  );
-	}
-
 	@Override public String toString() {
 		if ( this == null ) return null;
 		if ( StringUtils.isEmpty(this.hour) ) return null;
@@ -67,6 +67,25 @@ public class Hour implements Comparable<Hour> {
 				
 		if ( compareHour != 0 ) return compareHour;
 		return compareMinutes;
+	}
+	
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public String getHour() {
+		return hour;
+	}
+	public void setHour(String hour) {
+		this.hour = hour;
+	}
+	public String getMinute() {
+		return minute;
+	}
+	public void setMinute(String minute) {
+		this.minute = minute;
 	}
 	
 }

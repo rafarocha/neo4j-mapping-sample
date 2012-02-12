@@ -1,22 +1,20 @@
 package com.rafarocha.sample.domain;
 
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.data.neo4j.annotation.GraphId;
 import org.springframework.data.neo4j.annotation.NodeEntity;
+import org.springframework.data.neo4j.annotation.RelatedTo;
 import org.springframework.util.CollectionUtils;
 
 @NodeEntity
 public class Itinerary {
 	
 	@GraphId protected Long id;
-	
-//	@RelatedTo(elementClass = Queue.class, type = "ACTS_IN", direction = INCOMING)
-	private Map<Period, Queue<String>> board;
+	@RelatedTo(elementClass = Period.class) private Period period;
+	@RelatedTo(elementClass = Hour.class) private Set<Hour> hours;
 
 	public Long getId() {
 		return id;
@@ -24,39 +22,36 @@ public class Itinerary {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public Map<Period, Queue<String>> getBoard() {
-		return this.board;
+	public Period getPeriod() {
+		return period;
 	}
-	protected void setBoard(Map<Period, Queue<String>> board) {
-		this.board = board;
+	public void setPeriod(Period period) {
+		this.period = period;
+	}
+	public Set<Hour> getHours() {
+		return hours;
+	}
+	protected void setHours(Set<Hour> hours) {
+		this.hours = hours;
 	}
 	
-	public Itinerary add(Period period, String hour) {
-		getScheduleButIfEmptyInitIt( period ).add( hour );
+	public Itinerary set(Period period) {
+		setPeriod(period);
 		return this;
 	}
 	
-	public static Itinerary create() {
-		try {
-			return Itinerary.class.newInstance();
-		} catch (Exception e) {
-			return null;
-		}
+	public Itinerary set(String hour) {
+		return add(hour);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Queue<String> getScheduleButIfEmptyInitIt( Period period ) {
-		if ( getBoard() != null ) {
-			if ( !CollectionUtils.isEmpty(getBoard().get(period)) ) 
-				return getBoard().get( period );
-		} else
-			setBoard( new HashedMap() );
-		getBoard().put(period, new PriorityQueue<String>());
-		return getBoard().get( period );
+	public Itinerary add(String hour) {
+		if ( CollectionUtils.isEmpty( this.hours ) )
+			this.hours = new HashSet<Hour>();
+		this.hours.add( Hour.create(hour) ); return this;
 	}
 	
 	private final static char bar = '|'; 
-	public Itinerary importScheduleFromGoogleEarth(Period period, String timesheet) {
+	public Itinerary importTimesheet(Period period, String timesheet) {
 		if ( period == null || StringUtils.isEmpty(timesheet) ) return this;
 		
 		String time = StringUtils.EMPTY;
@@ -65,11 +60,11 @@ public class Itinerary {
 			time += timesheet.charAt(i);
 
 			if ( time.length() == Hour.PATTERN.length() ) {
-				getScheduleButIfEmptyInitIt( period ).add( time );
+				add(time );
 				time = StringUtils.EMPTY;
 			}
 		}
-		return this;
+		return set( period );
 	}
 
 }

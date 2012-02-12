@@ -1,7 +1,7 @@
 package com.rafarocha.sample.domain;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.annotation.Resource;
 
@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.rafarocha.sample.repository.ItineraryRepository;
 
+import de.micromata.opengis.kml.v_2_2_0.Coordinate;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"/test-spring.xml"})
 @Transactional
@@ -21,20 +23,33 @@ public class DomainTest extends RestTestBase {
 	
 	@Resource ItineraryRepository repository;
 	
-	@Test public void createItinerary() {
-		Period workingDay = Pattern.WorkingDay.get().persist();
-		Period saturday = Pattern.Saturday.get().persist();
-		Period sunday = Pattern.Sunday.get().persist();
+	@Test public void simulateSuspectedSlowAdvisedAroundAspectJ() throws Exception {
+		long start = System.currentTimeMillis();
+		Line line = new Line( "313" ).persist();
 		
-		Itinerary itinerary = Itinerary.create()
-				.add(workingDay, "04:00")
-				.add(saturday, "05:00")
-				.add(sunday, "06:00")
-				.persist();
+		Coordinate coordinate = new Coordinate(0.0, 0.0);
+		for (int i = 0; i < 30; i++) {
+			line.addWay( new Position(coordinate) );
+		}
 		
-		Itinerary found = repository.findOne( itinerary.getId() );
-		assertNotNull( found.getBoard() ); // assertion error here, maybe mapping problem
-		assertEquals( itinerary.getBoard().size(), found.getBoard().size() );
+		long finish = System.currentTimeMillis();
+		String timeFormated = new SimpleDateFormat("mm:ss:SSSS").format( new Date(finish-start) );
+		System.out.println( String.format("time with persist %s", timeFormated) );
+	}
+	
+	
+	@Test public void simulateSuspectedSlowAdvisedAroundAspectJWithoutPersistEntity() throws Exception {
+		long start = System.currentTimeMillis();
+		Line line = new Line( "313" ); // remove persist method
+		
+		Coordinate coordinate = new Coordinate(0.0, 0.0);
+		for (int i = 0; i < 30; i++) {
+			line.addWay( new Position(coordinate) );
+		}
+		
+		long finish = System.currentTimeMillis();
+		String timeFormated = new SimpleDateFormat("mm:ss:SSSS").format( new Date(finish-start) );
+		System.out.println( String.format("time WITHOUT persist %s", timeFormated) );
 	}
 	
 }
